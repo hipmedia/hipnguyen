@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <!-- Bootstrap & jQuery -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <style>
+    body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background: radial-gradient(circle at center, #b30000 0%, #5c0000 100%);
+  color: #ffd700;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 5vh 5vw;
+  position: relative;
+  box-sizing: border-box;
+}
+
+    h1 {
+  font-family: 'Pacifico', cursive;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  margin-bottom: 40px;
+  color: #ffd700;
+  line-height: 1.4;
+  z-index: 10;
+  /* Hiệu ứng 3D Vàng Khối */
+  text-shadow: 
+      0 1px 0 #c6a300,
+      0 2px 0 #b08f00,
+      0 3px 0 #9b7c00,
+      0 4px 0 #856900,
+      0 5px 0 #705600,
+      0 6px 1px rgba(0,0,0,0.1),
+      0 0 5px rgba(0,0,0,0.1),
+      0 1px 3px rgba(0,0,0,0.3),
+      0 3px 5px rgba(0,0,0,0.2),
+      0 5px 10px rgba(0,0,0,0.25),
+      0 10px 10px rgba(0,0,0,0.2),
+      0 20px 20px rgba(0,0,0,0.15);
+  transform: perspective(500px) rotateX(10deg);
+  transition: all 0.3s ease;
+}
+
+    h1:hover {
+      transform: perspective(500px) rotateX(0deg) scale(1.02);
+      text-shadow: 
+          0 1px 0 #c6a300,
+          0 2px 0 #b08f00,
+          0 3px 0 #9b7c00,
+          0 4px 0 #856900,
+          0 5px 0 #705600,
+          0 6px 0 #5a4300,
+          0 7px 0 #453000,
+          0 8px 20px rgba(0,0,0,0.3);
+}
+
+    #countdown {
+  display: flex;
+  gap: 20px;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  font-weight: bold;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 5vh;
+  width: 100%;
+  max-width: 900px;
+  z-index: 10;
+}
+
+    .time-box {
+  background: rgba(100, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  border: 2px solid #ffd700;
+  border-radius: 15px;
+  padding: 20px;
+  flex: 1 1 120px;
+  text-align: center;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  min-width: 100px;
+  max-width: 180px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .time-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(255, 215, 0, 0.2);
+      background: rgba(150, 0, 0, 0.6);
+    }
+
+    .time-box span.value {
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  display: block;
+  color: #ffffff;
+  text-shadow: 0 0 10px #ffd700;
+  font-family: 'Pacifico', cursive;
+}
+
+    .time-box span.label {
+      font-size: 1rem;
+      color: #ffd700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 5px;
+    }
+
+    #toggleMusic {
+  background: rgba(0, 0, 0, 0.5);
+  color: #ffd700;
+  border: 2px solid #ffd700;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 3;
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  font-size: 1.2rem;
+}
+
+    #toggleMusic:hover {
+      background: #ffd700;
+      color: #b30000;
+      transform: scale(1.1);
+    }
+
+    #fireworks {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: radial-gradient(circle, #2e0000 0%, #000000 100%);
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      overflow: hidden;
+    }
+
+    #fireworksCanvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 1;
+    }
+
+    #fireworks .content {
+      z-index: 2;
+      text-align: center;
+      animation: zoomIn 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    #fireworks h1 {
+      font-size: clamp(3rem, 8vw, 6rem);
+      color: #ffeb3b;
+      text-shadow: 0 0 15px #ff5722, 0 0 30px #d50000;
+      margin-bottom: 10px;
+    }
+
+    #fireworks p {
+      font-family: 'Pacifico', cursive;
+      font-size: clamp(1.5rem, 4vw, 2.5rem);
+      color: #fff;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+
+    @keyframes zoomIn {
+      0% { transform: scale(0.5); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    #bottom-image {
+  width: 550px;
+  max-width: 95vw;
+  z-index: 5;
+  opacity: 0.97;
+  margin-top: auto;
+  position: relative;
+  filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+}
+
+    /* Lantern Animation */
+    .lantern-container {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 0;
+      z-index: 4;
+    }
+    .lantern-box {
+      position: absolute;
+      top: -10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform-origin: top center;
+      animation: swing 3s infinite ease-in-out alternate;
+    }
+    .lantern-box.left { left: 5%; animation-delay: 0s; }
+    .lantern-box.right { right: 5%; animation-delay: 1.5s; }
+    
+    .lantern-line { width: 2px; height: 60px; background: #333; }
+    .lantern-body {
+      width: 80px; height: 70px;
+      background: #d60000;
+      border-radius: 20px;
+      border: 2px solid #ffd700;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+      position: relative;
+    }
+    .lantern-body::before, .lantern-body::after {
+      content: ''; position: absolute; left: 50%; transform: translateX(-50%);
+      width: 40px; height: 6px; background: #333;
+    }
+    .lantern-body::before { top: -6px; border-radius: 4px 4px 0 0; }
+    .lantern-body::after { bottom: -6px; border-radius: 0 0 4px 4px; }
+    .lantern-tassel { width: 4px; height: 40px; background: #ffd700; margin-top: 5px; box-shadow: 0 0 5px #ffd700; }
+    
+    @keyframes swing { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+
+    /* Falling Flowers */
+    .apricot-flower {
+      position: absolute; top: -20px;
+      width: 15px; height: 15px;
+      background: #ffd700;
+      border-radius: 50% 50% 0 50%;
+      opacity: 0.8; z-index: 1; pointer-events: none;
+    }
+    @keyframes fall {
+      to { transform: translateY(100vh) rotate(720deg); }
+    }
+
+    /* --- New Features Styles --- */
+    .controls-container {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      z-index: 20;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .btn-tet {
+      padding: 10px 20px;
+      border-radius: 25px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      color: white;
+      text-transform: uppercase;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+
+    .btn-fortune {
+      background: linear-gradient(45deg, #ff0000, #ff5e00);
+      box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);
+    }
+
+    .btn-tet:hover {
+      transform: translateY(-3px);
+      filter: brightness(1.1);
+    }
+  
+    /* Interactive Flower */
+    .interactive-flower {
+      position: absolute;
+      width: 20px; height: 20px;
+      background: url('./assets/img/apricot-flower.png') no-repeat center/contain; /* Fallback color if img missing */
+      background-color: #ffd700; 
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 99;
+      animation: fadeOutMove 1s forwards;
+    }
+    
+    @keyframes fadeOutMove {
+      0% { transform: scale(0.5) translate(0, 0); opacity: 1; }
+      100% { transform: scale(1.5) translate(var(--tx), var(--ty)); opacity: 0; }
+    }
+
+    /* Modal Customization */
+    .modal-content.tet-modal {
+      background: #fff5e6;
+      border: 2px solid #b30000;
+      text-align: center;
+    }
+    .modal-header.tet-header {
+      background-color: #b30000;
+      color: #ffd700;
+      border-bottom: none;
+      justify-content: center;
+    }
+    .fortune-text {
+      font-family: 'Pacifico', cursive;
+      font-size: 1.5rem;
+      color: #d60000;
+      padding: 20px;
+    }
+
+    /* --- Animation Gieo Quẻ Overlay --- */
+    #shakingContainer {
+      display: none; 
+      position: fixed; 
+      top: 0; left: 0; 
+      width: 100%; height: 100%; 
+      background: rgba(0,0,0,0.85); 
+      z-index: 10000; 
+      justify-content: center; 
+      align-items: center; 
+      flex-direction: column;
+      backdrop-filter: blur(5px);
+    }
+
+    .fortune-cylinder {
+      position: relative;
+      width: 120px;
+      height: 180px;
+    }
+    
+    .fortune-cylinder.shaking {
+       animation: shake 0.1s infinite;
+    }
+
+    .cylinder-body {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, #800000, #d60000, #800000);
+      border: 3px solid #ffd700;
+      border-radius: 5px 5px 20px 20px;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    }
+
+    .cylinder-label {
+      width: 60px;
+      height: 60px;
+      background: #ffd700;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Pacifico', cursive;
+      color: #d60000;
+      font-size: 1.5rem;
+      border: 2px solid #b30000;
+      box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+    }
+
+    .sticks-bundle {
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80%;
+      height: 80px;
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      overflow: hidden;
+    }
+
+    .stick {
+      width: 10px;
+      height: 120%;
+      background: #deb887;
+      border-radius: 5px;
+      border: 1px solid #8b4513;
+      transform-origin: bottom center;
+      position: relative;
+      top: 20px;
+    }
+    
+    .stick:nth-child(1) { transform: rotate(-10deg) translateY(5px); height: 100%; }
+    .stick:nth-child(2) { transform: rotate(-5deg) translateY(0px); height: 110%; }
+    .stick:nth-child(3) { transform: rotate(0deg) translateY(-5px); height: 120%; background: #ffd700; } /* Lucky stick */
+    .stick:nth-child(4) { transform: rotate(5deg) translateY(0px); height: 110%; }
+    .stick:nth-child(5) { transform: rotate(10deg) translateY(5px); height: 100%; }
+
+    @keyframes shake {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      25% { transform: translate(-5px, 2px) rotate(-5deg); }
+      50% { transform: translate(0, 0) rotate(0deg); }
+      75% { transform: translate(5px, -2px) rotate(5deg); }
+      100% { transform: translate(0, 0) rotate(0deg); }
+    }
+    
+    .loading-text {
+      margin-top: 40px;
+      color: #ffd700;
+      font-family: 'Pacifico', cursive;
+      font-size: 2rem;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.7; transform: scale(0.95); }
+    }
+</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đếm Ngược Tết Nguyên Đán 2027</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Roboto&display=swap" rel="stylesheet">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./assets/img/tet.png" type="image/png">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <meta name="theme-color" content="#fcb69f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Tết 2027">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta property="og:title" content="Đếm Ngược Tết Nguyên Đán 2027">
+  <meta property="og:description" content="Cùng đếm ngược đến thời khắc giao thừa năm 2026 và tận hưởng không khí Tết sum vầy!">
+  <meta property="og:image" content="https://i.imgur.com/mZwzYqS.png">
+  <meta property="og:type" content="website">
+</head>
+<body class="container-fluid px-3 px-md-5">
+  <!-- Lanterns -->
+  <div class="lantern-container">
+    <div class="lantern-box left">
+      <div class="lantern-line"></div>
+      <div class="lantern-body"></div>
+      <div class="lantern-tassel"></div>
+    </div>
+    <div class="lantern-box right">
+      <div class="lantern-line"></div>
+      <div class="lantern-body"></div>
+      <div class="lantern-tassel"></div>
+    </div>
+  </div>
+
+  <h1>Đếm Ngược<br />Tết Nguyên Đán 2027</h1>
+  <div id="countdown" class="w-100">
+    <div class="time-box">
+      <span class="value" id="days">00</span>
+      <span class="label">Ngày</span>
+    </div>
+    <div class="time-box">
+      <span class="value" id="hours">00</span>
+      <span class="label">Giờ</span>
+    </div>
+    <div class="time-box">
+      <span class="value" id="minutes">00</span>
+      <span class="label">Phút</span>
+    </div>
+    <div class="time-box">
+      <span class="value" id="seconds">00</span>
+      <span class="label">Giây</span>
+    </div>
+  </div>
+
+  <!-- Khu vực điều khiển (Gieo quẻ & Tạo thiệp) -->
+  <div class="controls-container" id="uiControls">
+    <button class="btn-tet btn-fortune" onclick="gieoQue()">
+      <i class="fas fa-scroll"></i> Gieo Quẻ Đầu Năm
+    </button>
+  </div>
+
+  <button id="toggleMusic"><i class="fas fa-volume-up"></i></button>
+  <div id="fireworks">
+    <canvas id="fireworksCanvas"></canvas>
+    <div class="content">
+      <h1>CHÚC MỪNG NĂM MỚI</h1>
+      <p>Xuân Đinh Mùi 2027 - Vạn Sự Như Ý</p>
+    </div>
+  </div>
+
+  <!-- Animation Container (Lắc ống xăm) -->
+  <div id="shakingContainer">
+    <div class="fortune-cylinder">
+      <div class="sticks-bundle">
+        <div class="stick"></div>
+        <div class="stick"></div>
+        <div class="stick"></div>
+        <div class="stick"></div>
+        <div class="stick"></div>
+      </div>
+      <div class="cylinder-body">
+        <div class="cylinder-label">Lộc</div>
+      </div>
+    </div>
+    <div class="loading-text">Đang xin keo...</div>
+  </div>
+
+  <audio id="tetMusic" loop>
+    <source src="./assets/music/cai-tet-giau.mp3" type="audio/mpeg" />
+  </audio>
+  <audio id="finishMusic" loop>
+    <source src="./assets/music/happy-new-year.mp3" type="audio/mpeg" />
+  </audio>
+
+  <!-- Modal Gieo Quẻ -->
+  <div class="modal fade" id="fortuneModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content tet-modal">
+        <div class="modal-header tet-header">
+          <h5 class="modal-title">QUẺ BÓI ĐẦU NĂM</h5>
+        </div>
+        <div class="modal-body">
+          <div class="fortune-text" id="fortuneResult">
+            <!-- Nội dung quẻ bói sẽ hiện ở đây -->
+          </div>
+        </div>
+        <div class="modal-footer justify-content-center border-0">
+          <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Nhận Lộc</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Hiệu ứng Pháo Hoa (Canvas) ---
+    const canvas = document.getElementById('fireworksCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let fireworksArr = [];
+    let animationId;
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor(x, y, color) {
+        this.x = x; this.y = y; this.color = color;
+        this.velocity = { x: (Math.random() - 0.5) * 8, y: (Math.random() - 0.5) * 8 };
+        this.alpha = 1; this.friction = 0.96; this.gravity = 0.04;
+      }
+      draw() {
+        ctx.save(); ctx.globalAlpha = this.alpha; ctx.beginPath();
+        ctx.arc(this.x, this.y, 2, 0, Math.PI * 2); ctx.fillStyle = this.color; ctx.fill(); ctx.restore();
+      }
+      update() {
+        this.velocity.x *= this.friction; this.velocity.y *= this.friction;
+        this.velocity.y += this.gravity; this.x += this.velocity.x; this.y += this.velocity.y;
+        this.alpha -= 0.01;
+      }
+    }
+
+    class Firework {
+      constructor(x, y, targetY, color) {
+        this.x = x; this.y = y; this.targetY = targetY; this.color = color;
+        this.velocity = { x: 0, y: -Math.random() * 3 - 12 };
+        this.exploded = false;
+      }
+      draw() {
+        ctx.beginPath(); ctx.arc(this.x, this.y, 3, 0, Math.PI * 2); ctx.fillStyle = this.color; ctx.fill();
+      }
+      update() {
+        this.y += this.velocity.y; this.velocity.y += 0.2;
+        if (this.velocity.y >= 0 || this.y <= this.targetY) { this.exploded = true; this.explode(); }
+      }
+      explode() {
+        for (let i = 0; i < 60; i++) particles.push(new Particle(this.x, this.y, this.color));
+      }
+    }
+
+    function animateFireworks() {
+      animationId = requestAnimationFrame(animateFireworks);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+      if (Math.random() < 0.05) {
+        const x = Math.random() * canvas.width;
+        const color = `hsl(${Math.random() * 360}, 50%, 50%)`;
+        fireworksArr.push(new Firework(x, canvas.height, Math.random() * canvas.height / 2, color));
+      }
+      fireworksArr.forEach((fw, i) => { fw.draw(); fw.update(); if (fw.exploded) fireworksArr.splice(i, 1); });
+      particles.forEach((p, i) => { p.draw(); p.update(); if (p.alpha <= 0) particles.splice(i, 1); });
+    }
+
+    window.startFireworksEffect = function() {
+      const fwDiv = document.getElementById('fireworks');
+      fwDiv.style.display = 'flex';
+      if (!animationId) animateFireworks();
+      
+      // Xử lý chuyển đổi âm thanh an toàn hơn
+      const bgMusic = document.getElementById('tetMusic');
+      const finishMusic = document.getElementById('finishMusic');
+      
+      finishMusic.currentTime = 0;
+      finishMusic.play().then(() => {
+        // Chỉ dừng nhạc nền khi nhạc chúc mừng đã thực sự bắt đầu phát
+        bgMusic.pause();
+      }).catch((e) => {
+        console.warn("Lỗi phát nhạc chúc mừng:", e);
+        // Nếu không phát được nhạc mới (ví dụ chưa có file), hãy đảm bảo nhạc nền được bật
+        if (bgMusic.paused) bgMusic.play().catch(() => {});
+      });
+    };
+
+    window.stopFireworksEffect = function() {
+      const fwDiv = document.getElementById('fireworks');
+      fwDiv.style.display = 'none';
+      cancelAnimationFrame(animationId);
+      animationId = null;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      fireworksArr = []; particles = [];
+
+      // Dừng nhạc chúc mừng
+      const finishMusic = document.getElementById('finishMusic');
+      finishMusic.pause();
+    };
+
+    // --- Hiệu ứng Hoa Mai Rơi ---
+    function createFlower() {
+      const flower = document.createElement('div');
+      flower.classList.add('apricot-flower');
+      flower.style.left = Math.random() * 100 + 'vw';
+      flower.style.animationDuration = Math.random() * 3 + 2 + 's'; // 2-5s
+      flower.style.opacity = Math.random();
+      flower.style.transform = `scale(${Math.random()})`;
+      
+      document.body.appendChild(flower);
+
+      setTimeout(() => {
+        flower.remove();
+      }, 5000);
+    }
+    setInterval(createFlower, 300);
+
+    // --- Tính năng 1: Gieo Quẻ Đầu Năm ---
+    const fortunes = [
+      "Năm nay tiền vào như nước sông Đà, tiền ra nhỏ giọt như cà phê phin.",
+      "Tình duyên phơi phới, năm mới có gấu, thoát kiếp FA.",
+      "Sự nghiệp thăng tiến, sếp quý đồng nghiệp thương, lương thưởng ngập tràn.",
+      "Sức khỏe dồi dào, ăn được ngủ được là tiên.",
+      "Vạn sự như ý, tỷ sự như mơ, triệu triệu bất ngờ, không chờ cũng đến.",
+      "Ra ngõ gặp quý nhân, về nhà gặp thần tài.",
+      "Năm nay vận đỏ như son, làm gì cũng thắng, đánh đâu trúng đó.",
+      "Gia đạo bình an, con cháu sum vầy, hạnh phúc đong đầy."
+    ];
+
+    function gieoQue() {
+      const shaker = document.getElementById('shakingContainer');
+      const cylinder = document.querySelector('.fortune-cylinder');
+      
+      // Hiển thị animation lắc ống
+      shaker.style.display = 'flex';
+      cylinder.classList.add('shaking');
+      
+      // Sau 2 giây thì dừng lắc và hiện kết quả
+      setTimeout(() => {
+        shaker.style.display = 'none';
+        cylinder.classList.remove('shaking');
+        
+        const randomIndex = Math.floor(Math.random() * fortunes.length);
+        const fortune = fortunes[randomIndex];
+        document.getElementById('fortuneResult').innerText = fortune;
+        const modal = new bootstrap.Modal(document.getElementById('fortuneModal'));
+        modal.show();
+      }, 2000);
+    }
+
+    // --- Tính năng 3: Hiệu ứng tương tác (Hoa bay khi di chuột/chạm) ---
+    function createInteractiveFlower(x, y) {
+      const flower = document.createElement('div');
+      flower.classList.add('interactive-flower');
+      flower.style.left = x + 'px';
+      flower.style.top = y + 'px';
+      
+      // Random hướng bay
+      const tx = (Math.random() - 0.5) * 100 + 'px';
+      const ty = (Math.random() - 0.5) * 100 + 'px';
+      flower.style.setProperty('--tx', tx);
+      flower.style.setProperty('--ty', ty);
+
+      document.body.appendChild(flower);
+      setTimeout(() => flower.remove(), 1000);
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      // Giới hạn số lượng hoa để không lag (throttle đơn giản)
+      if (Math.random() < 0.2) { 
+        createInteractiveFlower(e.clientX, e.clientY);
+      }
+    });
+
+    document.addEventListener('touchstart', (e) => {
+      const touch = e.touches[0];
+      createInteractiveFlower(touch.clientX, touch.clientY);
+    });
+
+  </script>
+  <script src="script.js"></script>
+
+  <img id="bottom-image" src="./assets/img/tet-nguyen-dan.png" alt="Gia đình luộc bánh chưng" />
+</body>
+</html>
+
+
